@@ -155,7 +155,7 @@ int affich(){
         break;
     case 2 :
         trier_deadline();
-        printf("Tâches triées par deadline :\n");
+        printf("Taches triees par deadline :\n");
         afficher_tache();
         break;
     case 3 :
@@ -285,7 +285,7 @@ void modifier_Dodate()
 
 void supprimer_identifient(int identifiant)
 {
-    int i, found = 0;
+    int i, trouve = 0;
 
     for (i = 0; i < indice; i++)
     {
@@ -300,12 +300,12 @@ void supprimer_identifient(int identifiant)
 
             indice--;
 
-            found = 1;
+            trouve = 1;
             break;
         }
     }
 
-    if (found)
+    if (trouve)
     {
         printf("Tache avec l'identifiant %d supprimee avec succes.\n", identifiant);
     }
