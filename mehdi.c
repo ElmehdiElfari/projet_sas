@@ -3,19 +3,20 @@
 #include <string.h>
 #include <time.h>
 
-struct tache
+typedef struct 
 {
     int identifiant;
     char titre[50];
     char description[50];
-    int dodate[10];
+    int dodate[3];
     char statut[50];
-};
+}tache;
 
-struct tache T[100];
+tache T[100];
 int indice = 0;
 int numID = 1;
 void Ajoute();
+int differenceJour(tache t);
 void ajoutPlustache();
 void afficher_tache();
 void trier_alpha();
@@ -28,33 +29,35 @@ void supprimer_identifient(int identifiant);
 void rechercher_par_identifiant();
 void rechercher_par_titre();
 int affich();
-void swap( int i, int j);
 int Statistiques();
 int nombreTotalTaches();
 int nombreTachesCompletes();
 int nombreTachesIncompletes();
 int nombreJoursRestants(int index);
 
-int compare_tasks(struct tache a, struct tache b);
+void affichemoin3j();
+int compare_tasks(tache a,tache b);
 void trier_deadline();
+void nombre_jour_delai();
 
 int main()
 {
     int choix;
     int identifiant;
+   
+    
 
     while (1)
     {
         printf("\n1: Ajouter une nouvelle tache:\n");
         printf("2: Ajouter plusieurs taches:\n");
-        printf("3: Afficher la liste de toutes les taches (tri√©e par titre):\n");
+        printf("3: Afficher la liste de toutes les taches (triÈe par titre):\n");
         printf("4: Modifier une tache:\n");
         printf("5: Supprimer une tache par identifiant:\n");
         printf("6: Rechercher les identifiants :\n");
         printf("7: Rechercher les Taches :\n");
         printf("8: Statistiques :\n");
         printf("9: Quitter:\n");
-
         printf("\nEntrez votre choix: \n");
         scanf("%d", &choix);
 
@@ -73,7 +76,7 @@ int main()
             modifier();
             break;
         case 5:
-            printf("Entrez l'identifiant de la t√¢che √† supprimer : ");
+            printf("Entrez l'identifiant de la t‚che ‡ supprimer : ");
             scanf("%d", &identifiant);
             supprimer_identifient(identifiant);
             break;
@@ -105,10 +108,11 @@ void Ajoute()
 
     printf("Enter le titre : \n");
     scanf(" %[^\n]", T[indice].titre);
-
+	do{
     printf("Enter dodate (JJ/MM/AAAA) : \n");
     scanf("%d/%d/%d", &T[indice].dodate[0], &T[indice].dodate[1], &T[indice].dodate[2]);
-
+	}while((T[indice].dodate[0]<0||T[indice].dodate[0]>30)||(T[indice].dodate[1]<0||T[indice].dodate[1]>12));
+	
     printf("Enter description : \n");
     scanf(" %[^\n]", T[indice].description);
 
@@ -116,35 +120,33 @@ void Ajoute()
     indice++;
 }
 
+int differenceJour(tache t){
+	struct tm deadlineA = {0};
+    deadlineA.tm_mday = t.dodate[0];
+    deadlineA.tm_mon = t.dodate[1] - 1;
+    deadlineA.tm_year = t.dodate[2] - 1900;
+    time_t d=mktime(&deadlineA);
+    time_t currentTime = time(NULL);
+    double differenceInSeconds =(double)difftime(d, currentTime);
+    int differenceInDays = (int)(differenceInSeconds / (60 * 60 * 24));
+    return differenceInDays;
+}
+
 void ajoutPlustache()
 {
     int combien;
+    int i;
     printf("Combien de taches voulez-vous ajouter:\n");
     scanf("%d",&combien);
-
-    for(int i=indice;i < indice + combien;i++){
-        T[i].identifiant = numID;
-        printf("Identifiant %d\n",numID);
-        printf("Enter le statut : \n");
-        scanf(" %[^\n]", T[indice].statut);
-
-        printf("Enter le titre : \n");
-        scanf(" %[^\n]", T[indice].titre);
-
-        printf("Enter dodate (JJ/MM/AAAA) : \n");
-        scanf("%d/%d/%d", &T[indice].dodate[0], &T[indice].dodate[1], &T[indice].dodate[2]);
-
-        printf("Enter description : \n");
-        scanf(" %[^\n]", T[indice].description);
-        numID++;
+    for(i=0;i <combien;i++){
+    	Ajoute();
     }
 
-    indice += combien;
 }
 int affich(){
     int a;
     printf("\nComment tu veux voir les fichiers: \n");
-    printf("1: Afficher par ordre alphab√©tique.\n");
+    printf("1: Afficher par ordre alphabÈtique.\n");
     printf("2: Afficher par dodate.\n");
     printf("3: Afficher par dodate est dans 3 jours ou moins.\n");
     printf("4: Retour.\n");
@@ -159,15 +161,18 @@ int affich(){
         afficher_tache();
         break;
     case 3 :
-        printf("Tri 3 jrs \n");
+        affichemoin3j();
         break;
     case 4 :
         return 0;
     }
 }
+
+
 void afficher_tache()
 {
-    for (int j = 0; j < indice; j++)
+	int j;
+    for ( j = 0; j < indice; j++)
     {
         printf("\nIdentifiant: %d\n", T[j].identifiant);
         printf("Statut: %s\n", T[j].statut);
@@ -179,19 +184,21 @@ void afficher_tache()
 
 void trier_alpha()
 {
-    struct tache temp;
-
-    for (int i = 0; i < indice - 1; i++)
+    tache temp;
+	int i,j;
+    for (i = 0; i < indice - 1; i++)
     {
-        for (int j = i + 1; j < indice; j++)
+        for (j = i + 1; j < indice; j++)
         {
             if (strcmp(T[i].titre, T[j].titre) > 0)
             {
-                swap(i,j);
+				temp=T[i];
+				T[i]=T[j];
+				T[j]=temp;
             }
         }
     }
-    for(int j=0;j<indice;j++){
+    for(j=0;j<indice;j++){
         printf("\nIdentifiant: %d\n", T[j].identifiant);
         printf("Statut: %s\n", T[j].statut);
         printf("Titre: %s\n", T[j].titre);
@@ -238,11 +245,10 @@ void modifier_Description()
         {
             printf("Entrer la nouvelle modification pour la description : ");
             scanf(" %[^\n]", T[i].description);
-            break;
-        }else{
-            printf("%d N'est existe pas",id);
+            return;
         }
     }
+    printf("%d N'est existe pas",id);
 }
 
 void modifier_Statut()
@@ -286,13 +292,13 @@ void modifier_Dodate()
 void supprimer_identifient(int identifiant)
 {
     int i, trouve = 0;
-
+	int j;
     for (i = 0; i < indice; i++)
     {
         if (T[i].identifiant == identifiant)
         {
 
-            for (int j = i; j < indice - 1; j++)
+            for (j = i; j < indice - 1; j++)
             {
                 T[j] = T[j + 1];
             }
@@ -311,16 +317,18 @@ void supprimer_identifient(int identifiant)
     }
     else
     {
-        printf("Aucune t√¢che trouv√©e avec l'identifiant %d.\n", identifiant);
+        printf("Aucune tache trouvee avec l'identifiant %d.\n", identifiant);
     }
 }
 
 void rechercher_par_identifiant()
 {
     int id;
+    int trouve=0;
+    int j;
     printf("Entrer l_identifiant de la tache a rechercher :\n ");
-            scanf("%d", &id);
-    for (int j = 0; j < indice; j++)
+    scanf("%d", &id);
+    for ( j = 0; j < indice; j++)
     {
         if (T[j].identifiant == id)
         {
@@ -329,18 +337,22 @@ void rechercher_par_identifiant()
             printf("Titre: %s\n", T[j].titre);
             printf("Description: %s\n", T[j].description);
             printf("Dodate: %d/%d/%d\n", T[j].dodate[0], T[j].dodate[1], T[j].dodate[2]);
-        }else{
-            printf("%d nexiste pas \n",id);
+            trouve=1;
         }
+        if(trouve==1)
+			return; 
     }
+    printf("%d nexiste pas \n",id);
 }
 
 void rechercher_par_titre()
 {
     char tar_get_titre[20];
+    int trouve=0;
     printf("entrer le nom rechercher : ");
     scanf(" %[^\n]",tar_get_titre);
-    for (int j = 0; j < indice; j++)
+    int j;
+    for (j = 0; j < indice; j++)
     {
         if (strcmp (T[j].titre, tar_get_titre) == 0)
         {
@@ -349,45 +361,32 @@ void rechercher_par_titre()
             printf("Titre: %s\n", T[j].titre);
             printf("Description: %s\n", T[j].description);
             printf("Dodate: %d/%d/%d\n", T[j].dodate[0], T[j].dodate[1], T[j].dodate[2]);
+            trouve=1;
         }
-        else{
-            printf("%s nexiste pas \n",tar_get_titre);
-        }
+        if(trouve==1)
+        	return;
+            
     }
+    if(trouve==0){
+    	printf("%s nexiste pas \n",tar_get_titre);
+	}
 }
 
-void swap( int i, int j){
-    struct tache temp;
-    temp.identifiant = T[i].identifiant;
-    T[i].identifiant = T[j].identifiant;
-    T[j].identifiant = temp.identifiant;
 
-    temp.dodate[0] = T[i].dodate[0];
-    T[i].dodate[0] = T[j].dodate[0];
-    T[j].dodate[0] = temp.dodate[0];
-
-    temp.dodate[1] = T[i].dodate[1];
-    T[i].dodate[1] = T[j].dodate[1];
-    T[j].dodate[1] = temp.dodate[1];
-
-    temp.dodate[2] = T[i].dodate[2];
-    T[i].dodate[2] = T[j].dodate[2];
-    T[j].dodate[2] = temp.dodate[2];
-
-    strcpy(temp.titre,T[i].titre);
-    strcpy(T[i].titre,T[j].titre);
-    strcpy(T[j].titre,temp.titre);
-
-    strcpy(temp.description,T[i].description);
-    strcpy(T[i].description,T[j].description);
-    strcpy(T[j].description,temp.description);
-
-    strcpy(temp.statut,T[i].statut);
-    strcpy(T[i].statut,T[j].statut);
-    strcpy(T[j].statut,temp.statut);
+void affichemoin3j(){
+	int i;
+	for(i=0;i<indice;i++){
+		if(differenceJour(T[i])<=3){
+			printf("\nIdentifiant: %d\n", T[i].identifiant);
+	        printf("Statut: %s\n", T[i].statut);
+	        printf("Titre: %s\n", T[i].titre);
+	        printf("Description: %s\n", T[i].description);
+	        printf("Dodate: %d/%d/%d\n", T[i].dodate[0], T[i].dodate[1], T[i].dodate[2]);
+		}
+	}
 }
 
-int compare_tasks(struct tache a, struct tache b)
+int compare_tasks(tache a, tache b)
 {
     struct tm deadlineA = {0};
     struct tm deadlineB = {0};
@@ -413,13 +412,14 @@ int compare_tasks(struct tache a, struct tache b)
 
 void trier_deadline()
 {
-    for (int i = 0; i < indice - 1; i++)
+	int i,j;
+    for ( i = 0; i < indice - 1; i++)
     {
-        for (int j = i + 1; j < indice; j++)
+        for (j = i + 1; j < indice; j++)
         {
             if (compare_tasks(T[i], T[j]) > 0)
             {
-                struct tache temp = T[i];
+                tache temp = T[i];
                 T[i] = T[j];
                 T[j] = temp;
             }
@@ -459,7 +459,7 @@ int Statistiques() {
                 break;
             }
         case 4:
-                printf("Afficher le nombre de jours restants jusqu'au delai de chaque tache\n");
+                nombre_jour_delai();
             break;
         case 5:
             return 0;
@@ -468,14 +468,16 @@ int Statistiques() {
     }
     return 1;
 }
+
 int nombreTotalTaches() {
     return indice;
 }
 
 int nombreTachesCompletes() {
     int count = 0;
-    for (int i = 0; i < indice; i++) {
-        if (strcmp(T[i].statut, "Complet") == 0) {
+    int i;
+    for (i = 0; i < indice; i++) {
+        if (strcmp(T[i].statut, "done") == 0) {
             count++;
         }
     }
@@ -484,4 +486,11 @@ int nombreTachesCompletes() {
 
 int nombreTachesIncompletes() {
     return indice - nombreTachesCompletes();
+}
+
+void nombre_jour_delai(){
+	int i;
+	for(i=0;i<indice;i++){
+		printf("\nle nombre de jours restant au delai de tache %d est %d\n",T[i].identifiant,differenceJour(T[i]));
+	}
 }
