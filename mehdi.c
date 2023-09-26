@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-typedef struct 
+typedef struct
 {
     int identifiant;
     char titre[50];
@@ -44,8 +44,8 @@ int main()
 {
     int choix;
     int identifiant;
-   
-    
+
+
 
     while (1)
     {
@@ -112,7 +112,7 @@ void Ajoute()
     printf("Enter dodate (JJ/MM/AAAA) : \n");
     scanf("%d/%d/%d", &T[indice].dodate[0], &T[indice].dodate[1], &T[indice].dodate[2]);
 	}while((T[indice].dodate[0]<0||T[indice].dodate[0]>30)||(T[indice].dodate[1]<0||T[indice].dodate[1]>12));
-	
+
     printf("Enter description : \n");
     scanf(" %[^\n]", T[indice].description);
 
@@ -214,7 +214,7 @@ int modifier(){
     printf("1: Modifier la description\n");
     printf("2: Modifier le statut\n");
     printf("3: Modifier la date (JJ/MM/AAAA)\n");
-    printf("3: Retour\n");
+    printf("0: Retour\n");
     scanf("%d", &choix);
 
     switch (choix)
@@ -263,11 +263,10 @@ void modifier_Statut()
         {
             printf("Entrer la nouvelle modification pour le statut : ");
             scanf(" %[^\n]", T[i].statut);
-            break;
-        }else{
-            printf("%d N'est existe pas",id);
+            return;
         }
     }
+    printf("%d N'est existe pas",id);
 }
 
 void modifier_Dodate()
@@ -282,11 +281,11 @@ void modifier_Dodate()
         {
             printf("Entrer la nouvelle modification pour dodate (JJ/MM/AAAA) : ");
             scanf("%d/%d/%d", &T[i].dodate[0], &T[i].dodate[1], &T[i].dodate[2]);
-            break;
-        }else{
-            printf("%d N'est existe pas",id);
+            return;
         }
+
     }
+    printf("%d N'est existe pas",id);
 }
 
 void supprimer_identifient(int identifiant)
@@ -340,7 +339,7 @@ void rechercher_par_identifiant()
             trouve=1;
         }
         if(trouve==1)
-			return; 
+			return;
     }
     printf("%d nexiste pas \n",id);
 }
@@ -365,7 +364,7 @@ void rechercher_par_titre()
         }
         if(trouve==1)
         	return;
-            
+
     }
     if(trouve==0){
     	printf("%s nexiste pas \n",tar_get_titre);
